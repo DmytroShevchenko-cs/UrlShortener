@@ -8,8 +8,7 @@ using NodaTime.Serialization.SystemTextJson;
 public static class InfrastructureServiceExtensions
 {
     public static IServiceCollection RegisterInfrastructureServices(
-        this IServiceCollection services,
-        IConfiguration configuration)
+        this IServiceCollection services)
     {
         services.AddOptions();
         

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Routing;
 using System.IdentityModel.Tokens.Jwt;
+using UrlShortener.Web.Constraints;
 using UrlShortener.Web.Extensions;
 
 namespace UrlShortener.Web;
@@ -10,13 +12,20 @@ public class Program
     {
         var builder = CreateApplicationBuilder(args);
         
+        builder.Services.AddControllersWithViews();
+        
         builder.Services
             .RegisterConfigurations(builder.Configuration)
-            .RegisterInfrastructureServices(builder.Configuration)
+            .RegisterInfrastructureServices()
             .RegisterDatabaseAccess(builder.Configuration)
             .RegisterCustomServices()
             .RegisterIdentity(builder.Configuration)
             .RegisterSwagger();
+        
+        builder.Services.Configure<RouteOptions>(options =>
+        {
+            options.ConstraintMap.Add("shortUrlCode", typeof(ShortUrlCodeConstraint));
+        });
         
         JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         
@@ -33,6 +42,10 @@ public class Program
         app.UseConfiguredSwagger();
         
         app.MapControllers();
+        
+        app.MapControllerRoute(
+            name: "default",
+            pattern: "{controller=Home}/{action=Index}/{id?}");
         
         app.UseExceptionHandler(appError =>
         {

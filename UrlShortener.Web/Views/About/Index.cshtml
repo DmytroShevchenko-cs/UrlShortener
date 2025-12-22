@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "About";
+    var description = "Our URL shortening algorithm uses a combination of random character generation and database uniqueness checking. " +
+        "When a URL is submitted, the system generates an 8-character code using alphanumeric characters (A-Z, a-z, 0-9). " +
+        "The code is checked against existing codes in the database to ensure uniqueness. " +
+        "If a collision occurs, a new code is generated until a unique one is found. " +
+        "The mapping between the short code and the full URL is stored in the database for quick retrieval.";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">About UrlShortener Algorithm</h4>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-0">@description</p>
+        </div>
+    </div>
+</div>
+

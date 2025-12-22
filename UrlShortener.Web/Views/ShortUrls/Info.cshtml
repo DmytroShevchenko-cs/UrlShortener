@@ -1,0 +1,97 @@
+@model UrlShortener.DAL.Queries.ShortUrls.GetShortUrlById.GetShortUrlByIdQueryResult
+@{
+    ViewData["Title"] = "Short URL Details";
+    var shortUrl = $"{Context.Request.Scheme}://{Context.Request.Host}/{Model.ShortUrlCode}";
+}
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Short URL Details</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label class="form-label text-muted small mb-2">Short URL</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="shortUrlInput" value="@shortUrl" readonly>
+                        <button class="btn btn-primary" type="button" onclick="copyShortUrl(this)">
+                            <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    <label class="form-label text-muted small mb-2">Full URL</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="fullUrlInput" value="@Model.FullUrl" readonly>
+                        <a href="@Model.FullUrl" target="_blank" class="btn btn-outline-primary">
+                            <i class="bi bi-box-arrow-up-right"></i> Open
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5" />
+
+            <div class="info-card">
+                <h3 class="info-title">URL Details</h3>
+                <div class="info-grid">
+                    <div class="info-row">
+                        <span class="info-label">Record ID</span>
+                        <span class="info-value">#@Model.Id</span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Author</span>
+                        <div class="info-value-group">
+                            @if (!string.IsNullOrEmpty(Model.UserFirstName) || !string.IsNullOrEmpty(Model.UserLastName))
+                            {
+                                <div class="info-primary">@Model.UserFirstName @Model.UserLastName</div>
+                                <div class="info-secondary">@Model.UserEmail</div>
+                            }
+                            else
+                            {
+                                <div class="info-primary">@Model.UserEmail</div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Creation Date</span>
+                        <span class="info-value">@Model.CreatedAt.ToDateTimeUtc().ToString("yyyy-MM-dd HH:mm:ss")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2vh" class="mt-5">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function copyShortUrl(button) {
+        const input = document.getElementById('shortUrlInput');
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value);
+
+        const originalHtml = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-check-circle"></i> Copied';
+        button.classList.replace('btn-primary', 'btn-success');
+
+        setTimeout(() => {
+            button.innerHTML = originalHtml;
+            button.classList.replace('btn-success', 'btn-primary');
+        }, 1800);
+    }
+
+</script>
+

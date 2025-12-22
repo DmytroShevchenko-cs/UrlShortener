@@ -1,0 +1,159 @@
+@using UrlShortener.DAL.Database.Entities.Identity
+@inject UserManager<User> UserManager
+@{
+    ViewData["Title"] = "Home";
+    var user = await UserManager.GetUserAsync(User);
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var isAdmin = User.IsInRole("Admin");
+    var userId = user?.Id;
+}
+
+<div class="hero-section text-center">
+    <h1>Welcome to UrlShortener</h1>
+    <p class="lead">Transform your long URLs into short, shareable links instantly</p>
+    
+    @if (isAuthenticated)
+    {
+        <div class="mt-4">
+            <p class="text-success mb-0">Logged in as: <strong>@User.Identity.Name</strong></p>
+        </div>
+    }
+    else
+    {
+        <div class="mt-4">
+            <p class="text-muted">Please <a asp-controller="Account" asp-action="Login">login</a> or <a asp-controller="Account" asp-action="Register">register</a> to continue.</p>
+        </div>
+    }
+</div>
+
+<div class="table-section mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0" id="tableTitle">
+                @if (isAuthenticated)
+                {
+                    @if (isAdmin)
+                    {
+                        <text>All Short URLs (Admin)</text>
+                    }
+                    else
+                    {
+                        <text>Your Short URLs</text>
+                    }
+                }
+                else
+                {
+                    <text>Public Short URLs</text>
+                }
+            </h5>
+        </div>
+        <div class="card-body" ng-app="shortUrlsApp" ng-controller="ShortUrlsController">
+            <div>
+                <div ng-if="error" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+                    <div class="alert alert-danger fade show shadow" role="alert" style="min-width: 300px; max-width: 400px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                            <span style="flex: 1;">{{error}}</span>
+                            <button type="button" class="btn btn-sm btn-outline-danger" ng-click="closeError()">Close</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th ng-if="isAdmin">ID</th>
+                                <th ng-if="isAdmin">User</th>
+                                <th>Short URL</th>
+                                <th>Full URL</th>
+                                <th>Created</th>
+                                <th ng-if="isAuthenticated">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-if="urls.length === 0">
+                                <td ng-attr-colspan="{{isAdmin ? 6 : (isAuthenticated ? 4 : 3)}}" class="text-center text-muted">
+                                    No URLs yet.
+                                </td>
+                            </tr>
+                            <tr ng-repeat="url in urls">
+                                <td ng-if="isAdmin">{{url.id}}</td>
+                                <td ng-if="isAdmin">{{url.userEmail || 'N/A'}}</td>
+                                <td style="max-width: 200px;">
+                                    <a ng-href="{{getShortUrl(url.shortUrlCode)}}" target="_blank" rel="noopener noreferrer" 
+                                       ng-attr-title="{{getShortUrl(url.shortUrlCode)}}"
+                                       style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        {{getShortUrl(url.shortUrlCode)}}
+                                    </a>
+                                </td>
+                                <td style="max-width: 300px;">
+                                    <a ng-href="{{url.fullUrl}}" target="_blank" rel="noopener noreferrer"
+                                       ng-attr-title="{{url.fullUrl}}"
+                                       style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                        {{url.fullUrl}}
+                                    </a>
+                                </td>
+                                <td>{{url.createdAtString || formatDate(url.createdAt)}}</td>
+                                <td ng-if="isAuthenticated">
+                                    <a ng-href="{{getInfoUrl(url.id)}}" class="btn btn-sm btn-info me-1">View</a>
+                                    <button ng-if="canDelete(url)" class="btn btn-sm btn-danger" ng-click="deleteUrl(url.id)">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <button ng-if="isAuthenticated" type="button" class="btn btn-primary mt-3" ng-click="openAddModal()">
+                    Add New URL
+                </button>
+                
+                <div ng-if="showModal" class="modal show d-block" 
+                     ng-click="$event.target === $event.currentTarget && closeModal()">
+                    <div class="modal-dialog modal-dialog-centered" ng-click="$event.stopPropagation()">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title mb-0">Add New Short URL</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div ng-if="error" class="alert alert-danger mb-3" role="alert">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                                        <span style="flex: 1;">{{error}}</span>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" ng-click="closeError()">Close</button>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="fullUrl" class="form-label">Full URL:</label>
+                                    <input type="url" class="form-control" id="fullUrl" ng-model="newUrl" 
+                                           placeholder="https://example.com" ng-disabled="isSubmitting"
+                                           ng-keyup="$event.keyCode === 13 && addUrl()">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" ng-click="closeModal()" ng-disabled="isSubmitting">Cancel</button>
+                                <button type="button" class="btn btn-primary" ng-click="addUrl()" ng-disabled="isSubmitting || !newUrl || !newUrl.trim()">
+                                    <span ng-if="isSubmitting">
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Creating...
+                                    </span>
+                                    <span ng-if="!isSubmitting">Create</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    
+    <script>
+        window.isAuthenticated = @(isAuthenticated ? "true" : "false");
+        window.isAdmin = @(isAdmin ? "true" : "false");
+        window.currentUserId = @(userId?.ToString() ?? "null");
+    </script>
+    
+    <script src="~/js/shortUrlsApp.js"></script>
+}
