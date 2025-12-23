@@ -14,6 +14,13 @@ public class Program
         
         builder.Services.AddControllersWithViews();
         
+        // Health checks
+        builder.Services.AddHealthChecks()
+            .AddNpgSql(
+                connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+                name: "postgresql",
+                tags: new[] { "db", "sql", "postgresql" });
+        
         builder.Services
             .RegisterConfigurations(builder.Configuration)
             .RegisterInfrastructureServices()
@@ -40,6 +47,9 @@ public class Program
         app.UseAuthorization();
         
         app.UseConfiguredSwagger();
+        
+        // Health check endpoint
+        app.MapHealthChecks("/health");
         
         app.MapControllers();
         

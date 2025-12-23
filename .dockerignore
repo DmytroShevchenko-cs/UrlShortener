@@ -21,5 +21,6 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+**/UrlShortener.Tests/**
 LICENSE
 README.md

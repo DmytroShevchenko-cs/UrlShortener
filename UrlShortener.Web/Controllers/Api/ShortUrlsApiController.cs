@@ -8,7 +8,7 @@ using UrlShortener.Shared.Common.Constants;
 namespace UrlShortener.Web.Controllers.Api;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/shorturls")]
 public class ShortUrlsApiController : ControllerBase
 {
     private readonly IShortUrlService _shortUrlService;

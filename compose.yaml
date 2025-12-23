@@ -1,1 +1,55 @@
-﻿
+﻿services:
+  postgres:
+    image: postgres:16
+    container_name: urlshortener-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: urlshortener
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - urlshortener-network
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: ./UrlShortener.Web/Dockerfile
+    container_name: urlshortener-web
+    ports:
+      - "8080:80"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Staging
+      ASPNETCORE_URLS: http://+:80
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=urlshortener;Username=postgres;Password=postgres
+      AdminConfig__DefaultAdminUserEmail: admin@example.com
+      AdminConfig__DefaultAdminUserPassword: ChangeMe123!
+      AdminConfig__DefaultAdminUserFirstName: Admin
+      AdminConfig__DefaultAdminUserLastName: User
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - urlshortener-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+
+networks:
+  urlshortener-network:

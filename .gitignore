@@ -7,3 +7,4 @@ riderModule.iml
 /UrlShortener.Web/appsettings.json
 
 .idea
+.env

@@ -4,17 +4,17 @@
     angular.module('shortUrlsApp', [])
         .service('shortUrlsService', ['$http', function($http) {
             this.getShortUrls = function() {
-                return $http.get('/api/ShortUrlsApi').then(function(response) {
+                return $http.get('/api/shorturls').then(function(response) {
                     return response.data;
                 });
             };
             
             this.createShortUrl = function(fullUrl) {
-                return $http.post('/api/ShortUrlsApi', { fullUrl: fullUrl });
+                return $http.post('/api/shorturls', { fullUrl: fullUrl });
             };
             
             this.deleteShortUrl = function(id) {
-                return $http.delete('/api/ShortUrlsApi/' + id);
+                return $http.delete('/api/shorturls/' + id);
             };
         }])
         .controller('ShortUrlsController', ['$scope', 'shortUrlsService', function($scope, shortUrlsService) {
