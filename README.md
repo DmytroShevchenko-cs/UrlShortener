@@ -2,6 +2,14 @@
 
 A modern URL shortening service built with ASP.NET Core 9.0, featuring user authentication, role-based access control, and a RESTful API.
 
+## Live Demo
+
+**Deployed Application**: [http://194.37.81.107:8080](http://194.37.81.107:8080)
+
+- **Web UI**: [http://194.37.81.107:8080](http://194.37.81.107:8080)
+- **Swagger UI**: [http://194.37.81.107:8080/swagger](http://194.37.81.107:8080/swagger)
+- **Health Check**: [http://194.37.81.107:8080/health](http://194.37.81.107:8080/health)
+
 ## Features
 
 - URL shortening with custom codes
