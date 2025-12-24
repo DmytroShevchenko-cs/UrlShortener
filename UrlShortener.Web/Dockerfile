@@ -7,7 +7,6 @@ COPY ["UrlShortener.Web/UrlShortener.Web.csproj", "UrlShortener.Web/"]
 COPY ["UrlShortener.BLL/UrlShortener.BLL.csproj", "UrlShortener.BLL/"]
 COPY ["UrlShortener.DAL/UrlShortener.DAL.csproj", "UrlShortener.DAL/"]
 COPY ["UrlShortener.Shared/UrlShortener.Shared.csproj", "UrlShortener.Shared/"]
-COPY ["UrlShortener.Database/UrlShortener.Database.csproj", "UrlShortener.Database/"]
 
 # Restore dependencies
 RUN dotnet restore "UrlShortener.Web/UrlShortener.Web.csproj"
